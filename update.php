@@ -16,7 +16,7 @@
   */
 
 include_once("functions.php");
-ConnectToDB();
+$link = ConnectToDB();
 
 // Extract headers
 $password = '';
@@ -45,23 +45,23 @@ if ($data[0] == 'P') { //Zip starts with 'PK'
 $update = new SimpleXMLElement($data);
 
 if ($update->getName() == "MOPComplete")
-  clearCompetition($cmpId);
+  clearCompetition($cmpId, $link);
 else if ($update->getName() != "MOPDiff")
   die("Unknown data");
   
 foreach ($update->children() as $d) {
   if ($d->getName() == "cmp")
-    processCompetitor($cmpId, $d);
+    processCompetitor($cmpId, $d, $link);
   else  if ($d->getName() == "tm")
-    processTeam($cmpId, $d);
+    processTeam($cmpId, $d, $link);
   else if ($d->getName() == "cls")
-    processClass($cmpId, $d);
+    processClass($cmpId, $d, $link);
   else if ($d->getName() == "org")
-    processOrganization($cmpId, $d);
+    processOrganization($cmpId, $d, $link);
   else if ($d->getName() == "ctrl")
-    processControl($cmpId, $d);
+    processControl($cmpId, $d, $link);
   else if ($d->getName() == "competition")
-    processCompetition($cmpId, $d);   
+    processCompetition($cmpId, $d, $link);   
 }
 
 returnStatus('OK');

@@ -16,7 +16,7 @@
   */
 
 	include_once("functions.php");
-	ConnectToDB();
+	$link = ConnectToDB();
 
 
 function setupIddBase() {
@@ -33,7 +33,7 @@ function setupBaseCompetitor() {
          " INDEX(org), INDEX(cls),  INDEX(stat, rt), INDEX(st)";
 }
 
-function setup() {  
+function setup($link) {  
  $sql = "CREATE TABLE IF NOT EXISTS mopCompetition (".
    			setupIddBase().
    			" name VARCHAR(64) NOT NULL DEFAULT '',".
@@ -42,7 +42,7 @@ function setup() {
    			" homepage VARCHAR(128) NOT NULL DEFAULT ''".
    			") ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
  
-  query($sql);
+  query($link, $sql);
  
   
   $sql = "CREATE TABLE IF NOT EXISTS mopControl (".
@@ -50,7 +50,7 @@ function setup() {
    			" name VARCHAR(64) NOT NULL DEFAULT ''".
    			") ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
  
-  query($sql);
+  query($link, $sql);
   
   $sql = "CREATE TABLE IF NOT EXISTS mopClass (".
    			setupIddBase().
@@ -58,14 +58,14 @@ function setup() {
    			" ord INT NOT NULL DEFAULT 0, INDEX(ord)".
    			") ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
    			
-  query($sql);
+  query($link, $sql);
   
   $sql = "CREATE TABLE IF NOT EXISTS mopOrganization (".
    			 setupIddBase().
    			" name VARCHAR(64) NOT NULL DEFAULT ''".
    			") ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
    			
-  query($sql);
+  query($link, $sql);
   
   $sql = "CREATE TABLE IF NOT EXISTS mopCompetitor (".
    			 setupIddBase().
@@ -74,14 +74,14 @@ function setup() {
          " it INT NOT NULL DEFAULT 0". // Input time
    			") ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
   			
-  query($sql);
+  query($link, $sql);
  
   $sql = "CREATE TABLE IF NOT EXISTS mopTeam (".
    			 setupIddBase().
    			 setupBaseCompetitor().
    			") ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
 
-  query($sql);
+  query($link, $sql);
    
   $sql = "CREATE TABLE IF NOT EXISTS mopTeamMember (".
          " cid INT NOT NULL, id INT NOT NULL,".
@@ -90,7 +90,7 @@ function setup() {
          " rid INT NOT NULL DEFAULT 0".
          ") ENGINE = MyISAM";
 
-  query($sql);
+  query($link, $sql);
   
   $sql = "CREATE TABLE IF NOT EXISTS mopClassControl (".
          " cid INT NOT NULL, id INT NOT NULL,".
@@ -99,7 +99,7 @@ function setup() {
          " ctrl INT NOT NULL DEFAULT 0".
          ") ENGINE = MyISAM";
 
-  query($sql);
+  query($link, $sql);
   
   $sql = "CREATE TABLE IF NOT EXISTS mopRadio (".
          " cid INT NOT NULL, id INT NOT NULL,".
@@ -108,7 +108,7 @@ function setup() {
          " rt INT NOT NULL DEFAULT 0".
          ") ENGINE = MyISAM";
 
-  query($sql);
+  query($link, $sql);
 
 }
 
@@ -124,7 +124,7 @@ function setup() {
 
 <?php
 
-setup();
+setup($link);
 
 print '<h1>MeOS Online Results</h1><p>Configuration seems to be correct.</p>';
 

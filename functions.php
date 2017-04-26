@@ -19,22 +19,17 @@ include_once("config.php");
 
 /** Connecto to MySQL */
 function ConnectToDB() {
-  $link = mysql_connect(MYSQL_HOSTNAME, MYSQL_USERNAME, MYSQL_PASSWORD);
+  $link = mysqli_connect(MYSQL_HOSTNAME, MYSQL_USERNAME, MYSQL_PASSWORD, MYSQL_DBNAME);
   if (!$link) {
-    die('Not connected : ' . mysql_error());
+    die('Not connected : ' . mysqli_error($link));
   }
-
-  $db_selected = mysql_select_db(MYSQL_DBNAME, $link);
-  if (!$db_selected) {
-    die ("Can't use ". MYSQL_HOSTNAME. ' : ' . mysql_error());
-  }    
   return $link;
 }
 
-function query($sql) {
- $result = mysql_query($sql);
+function query($link, $sql) {
+ $result = mysqli_query($link, $sql);
  if (!$result) {
-   die('Invalid query: ' . mysql_error());
+   die('Invalid query: ' . mysqli_error($link));
  } 
  return $result;
 }
@@ -70,7 +65,7 @@ function calculateResult($res) {
   $lastTeam = -1;
   $totalResult = array();
   $hasTotal = false;
-  while ($r = mysql_fetch_array($res)) {
+  while ($r = mysqli_fetch_array($res)) {
     if ($lastTeam == $r['id']) {
       $out[$count]['name'] .= " / " . $r['name'];
       continue; 
@@ -199,7 +194,7 @@ function formatResult($result) {
   print "</table>";
 }
 
-function selectRadio($cls) {
+function selectRadio($cls, $link) {
   global $cmpId;
   $radio = '';
   $sql = "SELECT leg, ctrl, mopControl.name FROM mopClassControl, mopControl ".
@@ -207,18 +202,18 @@ function selectRadio($cls) {
          "AND mopClassControl.id='$cls' AND mopClassControl.ctrl=mopControl.id ORDER BY leg ASC, ord ASC";
          
   
-  $res = mysql_query($sql);
-  $radios = mysql_num_rows($res);
+  $res = mysqli_query($link, $sql);
+  $radios = mysqli_num_rows($res);
   
   if ($radios > 0) {
     if (isset($_GET['radio'])) {
       $radio = $_GET['radio'];
     }
 
-    while ($r = mysql_fetch_array($res)) {
-      print '<a href="'."$PHP_SELF?cls=$cls&radio=$r[ctrl]".'">'.$r['name']."</a><br/>\n";      
+    while ($r = mysqli_fetch_array($res)) {
+      print '<a href="'.$_SERVER['PHP_SELF']."?cls=$cls&radio=$r[ctrl]".'">'.$r['name']."</a><br/>\n";      
     } 
-    print '<a href="'."$PHP_SELF?cls=$cls&radio=finish".'">'.'Finish'."</a><br/>\n";      
+    print '<a href="'.$_SERVER['PHP_SELF']."?cls=$cls&radio=finish".'">'.'Finish'."</a><br/>\n";      
   }
   else {
     // Only finish   
@@ -227,7 +222,7 @@ function selectRadio($cls) {
   return $radio; 
 }
 
-function selectLegRadio($cls, $leg, $ord) {
+function selectLegRadio($cls, $leg, $ord, $link) {
   global $cmpId;
   $radio = '';
   $sql = "SELECT ctrl, mopControl.name FROM mopClassControl, mopControl ".
@@ -235,13 +230,13 @@ function selectLegRadio($cls, $leg, $ord) {
          "AND mopClassControl.id='$cls' AND mopClassControl.ctrl=mopControl.id AND leg='$leg' AND ord='$ord'";
          
   
-  $res = mysql_query($sql);
-  $radios = mysql_num_rows($res);
+  $res = mysqli_query($link, $sql);
+  $radios = mysqli_num_rows($res);
   //print $sql;
   if ($radios > 0) {
     
-    while ($r = mysql_fetch_array($res)) {
-      print '<a href="'."$PHP_SELF?cls=$cls&leg=$leg&ord=$ord&radio=$r[ctrl]".'">'.$r['name']."</a>; \n";      
+    while ($r = mysqli_fetch_array($res)) {
+      print '<a href="'.$_SERVER['PHP_SELF']."?cls=$cls&leg=$leg&ord=$ord&radio=$r[ctrl]".'">'.$r['name']."</a>; \n";      
     } 
      
   }
@@ -249,16 +244,16 @@ function selectLegRadio($cls, $leg, $ord) {
     // Only finish   
     //$radio = 'finish';
   }
-  print '<a href="'."$PHP_SELF?cls=$cls&leg=$leg&ord=$ord&radio=finish".'">'.'Finish'."</a><br/>\n";
+  print '<a href="'.$_SERVER['PHP_SELF']."?cls=$cls&leg=$leg&ord=$ord&radio=finish".'">'.'Finish'."</a><br/>\n";
   return $radio; 
 }
 
 /** Update or add a record to a table. */
-function updateTable($table, $cid, $id, $sqlupdate) {
+function updateTable($table, $cid, $id, $sqlupdate, $link) {
   $ifc = "cid='$cid' AND id='$id'";
-  $res = mysql_query("SELECT id FROM `$table` WHERE $ifc");
+  $res = mysqli_query($link, "SELECT id FROM `$table` WHERE $ifc");
   
-  if (mysql_num_rows($res) > 0) {
+  if (mysqli_num_rows($res) > 0) {
     $sql = "UPDATE `$table` SET $sqlupdate WHERE $ifc";
   }
   else {
@@ -266,13 +261,13 @@ function updateTable($table, $cid, $id, $sqlupdate) {
   }
   
   //print "$sql\n";
-  mysql_query($sql);
+  mysqli_query($link, $sql);
 }
 
 /** Update a link with outer level over legs and other level over fieldName (controls, team members etc)*/
-function updateLinkTable($table, $cid, $id, $fieldName, $encoded) {
+function updateLinkTable($table, $cid, $id, $fieldName, $encoded, $link) {
   $sql = "DELETE FROM $table WHERE cid='$cid' AND id='$id'";  
-  mysql_query($sql);
+  mysqli_query($link, $sql);
   $legNumber = 1;  
   $legs = explode(";", $encoded);
   foreach($legs as $leg) {
@@ -280,70 +275,70 @@ function updateLinkTable($table, $cid, $id, $fieldName, $encoded) {
     foreach($runners as $key => $runner) {
       $sql = "INSERT INTO $table SET cid='$cid', id='$id', leg=$legNumber, ord=$key, $fieldName=$runner"; 
       //print "$sql \n";
-      mysql_query($sql);
+      mysqli_query($link, $sql);
     }
     $legNumber++;
   }  
 }
 
 /** Remove all data from a table related to an event. */
-function clearCompetition($cid) {
+function clearCompetition($cid, $link) {
    $tables = array(0=>"mopControl", "mopClass", "mopOrganization", "mopCompetitor",
                       "mopTeam", "mopTeamMember", "mopClassControl", "mopRadio");
                       
    foreach($tables as $table) {
      $sql = "DELETE FROM $table WHERE cid=$cid";
-     mysql_query($sql);
+     mysqli_query($link, $sql);
    } 
 }
 
 /** Update control table */
-function processCompetition($cid, $cmp) {
-  $name = mysql_real_escape_string($cmp);
-  $date = mysql_real_escape_string($cmp['date']);
-  $organizer = mysql_real_escape_string($cmp['organizer']);
-  $homepage = mysql_real_escape_string($cmp['homepage']);
+function processCompetition($cid, $cmp, $link) {
+  $name = mysqli_real_escape_string($link, $cmp);
+  $date = mysqli_real_escape_string($link, $cmp['date']);
+  $organizer = mysqli_real_escape_string($link, $cmp['organizer']);
+  $homepage = mysqli_real_escape_string($link, $cmp['homepage']);
   
   $sqlupdate = "name='$name', date='$date', organizer='$organizer', homepage='$homepage'";
-  updateTable("mopCompetition", $cid, 1, $sqlupdate);
+  updateTable("mopCompetition", $cid, 1, $sqlupdate, $link);
 }
 
 /** Update control table */
-function processControl($cid, $ctrl) {
-  $id = mysql_real_escape_string($ctrl['id']);
-  $name = mysql_real_escape_string($ctrl);
+function processControl($cid, $ctrl, $link) {
+  $id = mysqli_real_escape_string($link, $ctrl['id']);
+  $name = mysqli_real_escape_string($link, $ctrl);
   $sqlupdate = "name='$name'";
-  updateTable("mopControl", $cid, $id, $sqlupdate);
+  updateTable("mopControl", $cid, $id, $sqlupdate, $link);
 }
 
 /** Update class table */
-function processClass($cid, $cls) {
-  $id = mysql_real_escape_string($cls['id']);
-  $ord = mysql_real_escape_string($cls['ord']);
-  $name = mysql_real_escape_string($cls);
+function processClass($cid, $cls, $link) {
+  $id = mysqli_real_escape_string($link, $cls['id']);
+  $ord = mysqli_real_escape_string($link, $cls['ord']);
+  $name = mysqli_real_escape_string($link, $cls);
   $sqlupdate = "name='$name', ord='$ord'";
-  updateTable("mopClass", $cid, $id, $sqlupdate);
+  updateTable("mopClass", $cid, $id, $sqlupdate, $link);
     
   if (isset($cls['radio'])) {
-    $radio = mysql_real_escape_string($cls['radio']);
-    updateLinkTable("mopClassControl", $cid, $id, "ctrl", $radio);    
+    $radio = mysqli_real_escape_string($link, $cls['radio']);
+    updateLinkTable("mopClassControl", $cid, $id, "ctrl", $radio, $link);    
   }
 }
 
 /** Update organization table */
-function processOrganization($cid, $org) {
-  $id = mysql_real_escape_string($org['id']);
-  $name = mysql_real_escape_string($org);
+function processOrganization($cid, $org, $link) {
+  $id = mysqli_real_escape_string($link, $org['id']);
+  $name = mysqli_real_escape_string($link, $org);
   $sqlupdate = "name='$name'";
-  updateTable("mopOrganization", $cid, $id, $sqlupdate);
+  updateTable("mopOrganization", $cid, $id, $sqlupdate, $link);
 }
 
 /** Update competitor table */
-function processCompetitor($cid, $cmp) {
+function processCompetitor($cid, $cmp, $link) {
   $base = $cmp->base;
-  $id = mysql_real_escape_string($cmp['id']);
+  $id = mysqli_real_escape_string($link, $cmp['id']);
   
-  $name = mysql_real_escape_string($base);
+  $name = mysqli_real_escape_string($link, $base);
   $org = (int)$base['org'];
   $cls = (int)$base['cls'];
   $stat = (int)$base['stat'];
@@ -360,27 +355,27 @@ function processCompetitor($cid, $cmp) {
     $sqlupdate.=", it=$it, tstat=$tstat";
   }
 
-  updateTable("mopCompetitor", $cid, $id, $sqlupdate);  
+  updateTable("mopCompetitor", $cid, $id, $sqlupdate, $link);  
   if (isset($cmp->radio)) {
     $sql = "DELETE FROM mopRadio WHERE cid='$cid' AND id='$id'";
-    mysql_query($sql);
+    mysqli_query($link, $sql);
     $radios = explode(";", $cmp->radio);
     foreach($radios as $radio) {
       $tmp = explode(",", $radio);
       $radioId = (int)$tmp[0];
       $radioTime = (int)$tmp[1];
       $sql = "REPLACE INTO mopRadio SET cid='$cid', id='$id', ctrl='$radioId', rt='$radioTime'";
-      mysql_query($sql);
+      mysqli_query($link, $sql);
     }
   }  
 }
 
 /** Update team table */
-function processTeam($cid, $team) {
+function processTeam($cid, $team, $link) {
   $base = $team->base;
-  $id = mysql_real_escape_string($team['id']);  
+  $id = mysqli_real_escape_string($link, $team['id']);  
   
-  $name = mysql_real_escape_string($base);
+  $name = mysqli_real_escape_string($link, $base);
   $org = (int)$base['org'];
   $cls = (int)$base['cls'];
   $stat = (int)$base['stat'];
@@ -388,10 +383,10 @@ function processTeam($cid, $team) {
   $rt = (int)$base['rt'];
   
   $sqlupdate = "name='$name', org=$org, cls=$cls, stat=$stat, st=$st, rt=$rt";
-  updateTable("mopTeam", $cid, $id, $sqlupdate);
+  updateTable("mopTeam", $cid, $id, $sqlupdate, $link);
   
   if (isset($team->r)) {
-    updateLinkTable("mopTeamMember", $cid, $id, "rid", $team->r);
+    updateLinkTable("mopTeamMember", $cid, $id, "rid", $team->r, $link);
   }
 }
 
