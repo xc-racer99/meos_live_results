@@ -1,6 +1,6 @@
 <?php
   /*
-  Copyright 2013 Melin Software HB
+  Copyright 2014-2018 Melin Software HB
   
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -25,7 +25,10 @@
   if (isset($_GET['cmp']))
     $_SESSION['competition'] = 1 * (int)$_GET['cmp'];
 
-  $cmpId = $_SESSION['competition'];
+  if (isset($_SESSION['competition']))
+    $cmpId = $_SESSION['competition'];
+  else 
+    $cmpId = 0;
 
 ?>
 
@@ -60,21 +63,21 @@ td {padding-right:1em;}
 <body>
 
 <?php
-  if ($_GET['select'] == 1 || $cmpId == 0) {
+  if ((isset($_GET['select']) && $_GET['select'] == 1) || $cmpId == 0) {
     print "<h1>$lang[selectcmp]</h1>";
     $sql = "SELECT name, date, cid FROM mopCompetition ORDER BY date DESC";     
-    $res = mysqli_query($link, $sql);
+    $res = $link->query($sql);
     
-    while ($r = mysqli_fetch_array($res)) {
-      print '<a href="'.$_SERVER['PHP_SELF']."?cmp=$r[cid]".'">'."$r[name] ($r[date])</a><br/>\n";      
+    while ($r = $res->fetch_assoc()) {
+      print '<a href="'."$PHP_SELF?cmp=$r[cid]".'">'."$r[name] ($r[date])</a><br/>\n";      
     }
     die('</body></html>');    
   }
 
   $sql = "SELECT * FROM mopCompetition WHERE cid = '$cmpId'"; 
-  $res = mysqli_query($link, $sql);
+  $res = $link->query($sql);
 
-  if ($r = mysqli_fetch_array($res)) {
+  if ($r = $res->fetch_assoc()) {
     print "<h1>$r[name] &ndash; $r[date]</h1>\n";
     
     if (strlen($r['organizer']) > 0) {
@@ -89,10 +92,10 @@ td {padding-right:1em;}
 
   print '<div style="float:left;margin:2em;">';  
   $sql = "SELECT name, id FROM mopClass WHERE cid = '$cmpId' ORDER BY ord";     
-  $res = mysqli_query($link, $sql);
+  $res = $link->query($sql);
   
-  while ($r = mysqli_fetch_array($res)) {
-    print '<a href="'.$_SERVER['PHP_SELF']."?cls=$r[id]".'">'.$r['name']."</a><br/>\n";      
+  while ($r = $res->fetch_assoc()) {
+    print '<a href="'."$PHP_SELF?cls=$r[id]".'">'.$r['name']."</a><br/>\n";      
   }
 
   print '</div><div style="float:left;">';
@@ -100,14 +103,14 @@ td {padding-right:1em;}
   if (isset($_GET['cls'])) {
     $cls = (int)$_GET['cls']; 
     $sql = "SELECT name FROM mopClass WHERE cid='$cmpId' AND id='$cls'";
-    $res = mysqli_query($link, $sql);
-    $cinfo = mysqli_fetch_array($res);
+    $res = $link->query($sql);
+    $cinfo = $res->fetch_assoc();
     $cname = $cinfo['name'];
     
-    $sql = "SELECT max(leg) FROM mopTeamMember tm, mopTeam t WHERE tm.cid = '$cmpId' AND t.cid = '$cmpId' AND tm.id = t.id AND t.cls = $cls";
-    $res = mysqli_query($link, $sql);
-    $r = mysqli_fetch_array($res);
-    $numlegs = $r[0];
+    $sql = "SELECT max(leg) AS nleg FROM mopTeamMember tm, mopTeam t WHERE tm.cid = '$cmpId' AND t.cid = '$cmpId' AND tm.id = t.id AND t.cls = $cls";
+    $res = $link->query($sql);
+    $r = $res->fetch_assoc();
+    $numlegs = $r['nleg'];
     print "<h2>$cname</h2>\n";
 
     if ($numlegs > 1) {
@@ -122,19 +125,19 @@ td {padding-right:1em;}
         $radio = $_GET['radio'];
       }
       for ($k = 1; $k <= $numlegs; $k++) {
-        $sql = "SELECT max(ord) FROM mopTeamMember tm, mopTeam t WHERE t.cls = '$cls' AND tm.leg=$k AND ".
+        $sql = "SELECT max(ord) AS np FROM mopTeamMember tm, mopTeam t WHERE t.cls = '$cls' AND tm.leg=$k AND ".
                 "tm.cid = '$cmpId' AND t.cid = '$cmpId' AND tm.id = t.id";
-        $res = mysqli_query($link, $sql);
-        $r = mysqli_fetch_array($res);
-        $numparallel = $r[0];
+        $res = $link->query($sql);
+        $r = $res->fetch_assoc();
+        $numparallel = $r['np'];
         
         if ($numparallel == 0) {
           print "$k: ";
-          selectLegRadio($cls, $k, 0);
+          selectLegRadio($link, $cls, $k, 0);
         }
       }
       
-      if ($radio!='') {
+      if (isset($radio) && $radio!='') {
         if ($radio == 'finish') {
           $sql = "SELECT t.id AS id, cmp.name AS name, t.name AS team, cmp.rt AS time, cmp.stat AS status, ".
                  "cmp.it+cmp.rt AS tottime, cmp.tstat AS totstat ".
@@ -147,8 +150,8 @@ td {padding-right:1em;}
         else {
           $rid = (int)$radio;
           $sql = "SELECT name FROM mopControl WHERE cid='$cmpId' AND id='$rid'";
-          $res = mysqli_query($link, $sql);
-          $rinfo = mysqli_fetch_array($res);
+          $res = $link->query($sql);
+          $rinfo = $res->fetch_assoc();
           $rname = $rinfo['name'];
      
           $sql = "SELECT team.id AS id, cmp.name AS name, team.name AS team, radio.rt AS time, 1 AS status, ".
@@ -165,7 +168,7 @@ td {padding-right:1em;}
                    "ORDER BY radio.rt ASC ";
         }
 
-        $res = mysqli_query($link, $sql);
+        $res = $link->query($sql);
         $results = calculateResult($res);
         print "<h3>Leg $leg, $rname</h3>\n";
         formatResult($results);
@@ -175,7 +178,7 @@ td {padding-right:1em;}
 
       if (is_null($numlegs)) {
         //No teams;        
-        $radio = selectRadio($cls, $link);              
+        $radio = selectRadio($link, $cls);              
         if ($radio!='') {
           if ($radio == 'finish') {
             $sql = "SELECT cmp.id AS id, cmp.name AS name, org.name AS team, cmp.rt AS time, cmp.stat AS status ".
@@ -187,8 +190,8 @@ td {padding-right:1em;}
           else {
             $rid = (int)$radio;
             $sql = "SELECT name FROM mopControl WHERE cid='$cmpId' AND id='$rid'";
-            $res = mysqli_query($link, $sql);
-            $rinfo = mysqli_fetch_array($res);
+            $res = $link->query($sql);
+            $rinfo = $res->fetch_assoc();
             $rname = $rinfo['name'];
                       
             $sql = "SELECT cmp.id AS id, cmp.name AS name, org.name AS team, radio.rt AS time, 1 AS status ".
@@ -201,7 +204,7 @@ td {padding-right:1em;}
                    "AND cmp.cid = '$cmpId' AND radio.cid = '$cmpId' ".
                    "ORDER BY radio.rt ASC ";
           }
-          $res = mysqli_query($link, $sql);
+          $res = $link->query($sql);
           $results = calculateResult($res);
           print "<h3>$rname</h3>\n";         
           formatResult($results); 
@@ -209,7 +212,7 @@ td {padding-right:1em;}
       }
       else {
         // Single leg (patrol etc)        
-        $radio = selectRadio($cls, $link);
+        $radio = selectRadio($link, $cls);
       
        if ($radio!='') {
          if ($radio == 'finish') {
@@ -222,8 +225,8 @@ td {padding-right:1em;}
          else {
            $rid = (int)$radio;
            $sql = "SELECT name FROM mopControl WHERE cid='$cmpId' AND id='$rid'";
-           $res = mysqli_query($link, $sql);
-           $rinfo = mysqli_fetch_array($res);
+           $res = $link->query($sql);
+           $rinfo = $res->fetch_assoc();
            $rname = $rinfo['name'];
                       
            $sql = "SELECT team.id AS id, cmp.name AS name, team.name AS team, radio.rt AS time, 1 AS status ".
@@ -239,7 +242,7 @@ td {padding-right:1em;}
                    "ORDER BY radio.rt ASC ";
          }
                   
-         $res = mysqli_query($link, $sql);
+         $res = $link->query($sql);
          $results = calculateResult($res);         
          print "<h3>$rname</h3>\n";         
          formatResult($results);

@@ -1,1 +1,1 @@
-show.php
+splits.php
