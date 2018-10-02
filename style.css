@@ -1,0 +1,63 @@
+header img {
+    height: 100px;
+    float: left;
+}
+
+section, aside {
+    float: left;
+    padding: 10px;
+}
+
+/* Borders, don't wrap text */
+section table, section th, section td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 3px;
+    white-space: nowrap;
+}
+
+/* Vertical-align the headings */
+section table th {
+    vertical-align: top;
+}
+
+/* Make the rows striped */
+section table tr:nth-of-type(even) {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Turn dark on hover-over, except the first one */
+section table tr:nth-of-type(n + 2):hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Put the times aligned-right, with no border on the right */
+section table td.times {
+    text-align: right;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-right: none;
+}
+
+/* Center text, hide left border */
+section table td.rank {
+    border-left: none;
+    text-align: center;
+}
+
+/* Generic text-align classes */
+section table .left-aligned {
+    text-align: left;
+}
+section table .center-aligned {
+     text-align: center;
+}
+
+/* Container for nice horizontal scrolling splits */
+section {
+    max-width: 95%;
+}
+
+#table-container {
+    overflow-x: auto;
+}
