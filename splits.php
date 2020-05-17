@@ -109,7 +109,7 @@ if (!isset($cid) || isset($_GET['select'])) {
 		exit();
     } else {
 		/* We've selected a class, start setting up the page */
-		echo '<section>';
+		echo '<section id="results-section">';
 		$cls = $_GET['cls'];
 
 		/* Get the name of the selected class and output it */
