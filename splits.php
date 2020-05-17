@@ -70,6 +70,21 @@ if (!isset($cid) || isset($_GET['select'])) {
 ?>
     <aside>
     <a href="?select"><button>Select Competition</button></a>
+
+<?php
+    $query = "SELECT homepage FROM mopCompetition WHERE cid=" . $cid;
+    if ($result = $mysqli->query($query)) {
+        $homepage = $result->fetch_assoc()['homepage'];
+        if (!empty($homepage)) {
+            echo '<a href="' . $homepage . '"><button>Event Homepage</button></a>';
+        }
+        /* free result set */
+        $result->close();
+    } else {
+        printf("Error: %s\n", $mysqli->error);
+    }
+?>
+
     <h3>Select Class</h3>
 <?php
     $query = "SELECT id, name FROM mopClass WHERE cid=$cid ORDER BY ord";
