@@ -8,9 +8,9 @@ function formatTime($time) {
     if ($time > 3600)
         return sprintf("%d:%02d:%02d", $time/3600, ($time/60)%60, $time%60);
     elseif ($time > 0)
-        return sprintf("%02d:%02d", ($time/60)%60, $time%60);
+        return sprintf("%2d:%02d", ($time/60)%60, $time%60);
     else
-        return '00:00';
+        return '0:00';
 }
 
 function getStatusString($status) {
@@ -56,7 +56,7 @@ function competitorComparison($a, $b) {
 
     /* Seconds * 10 since midnight */
     $now = ( time() - strtotime("today") ) * 10;
-    
+
     $num_controls = $GLOBALS['num_controls'];
 
     while ($num_controls-- && $num_controls >= 0) {
@@ -103,6 +103,18 @@ function competitorComparison($a, $b) {
     /* Compare start time */
     return ( $a['start'] < $b['start'] ) ? -1 : 1;
 }
+/* Uses $GLOBALS["control-comparison"] to compare for that control */
+function competitorControlComparison($a, $b) {
+    $i = $GLOBALS["control-comparison"];
+
+    if( !isset( $a[$i . "-leg-time"] ) ) {
+        return 1;
+    } else if( !isset( $b[$i . "-leg-time"] ) ) {
+        return -1;
+    }
+
+    return $a[$i . "-leg-time"] - $b[$i . "-leg-time"];
+}
 
 function organizeCompetitors($competitors, $punches, $controls) {
     /* Multi-dimensional array containing punches - pre-sorted from SQL */
@@ -116,7 +128,7 @@ function organizeCompetitors($competitors, $punches, $controls) {
         }
         $i++;
     }
-    
+
     /* Set global variable */
     $GLOBALS['num_controls'] = $i;
 
@@ -132,6 +144,11 @@ function organizeCompetitors($competitors, $punches, $controls) {
             $competitor[$i] = $individual_control[$key]['rt'];
             $competitor[$i . "-pos"] = $key + 1;
             $competitor[$i . "-behind"] = $competitor[$i] - $individual_control[0]['rt'];
+            if( $i == 0) {
+                $competitor[$i . "-leg-time"] = $individual_control[$key]['rt'];
+            } else if( isset( $competitor[$i - 1] ) ) {
+                $competitor[$i . "-leg-time"] = $competitor[$i] - $competitor[$i - 1];
+            }
 
             $i++;
         }
@@ -139,6 +156,21 @@ function organizeCompetitors($competitors, $punches, $controls) {
         /* Calculate time behind winner, if finished */
         if( $competitor['time'] )
             $competitor['time-behind'] = $competitor['time'] - $competitors[0]['time'];
+    }
+
+    /* Calculate positions on each leg */
+    $i = 0;
+    for( $i = 0; $i < count( $individual_controls ); $i++ ) {
+        $GLOBALS["control-comparison"] = $i;
+        usort( $competitors, "competitorControlComparison");
+        $j = 0;
+        foreach( $competitors as &$competitor ) {
+            if( isset( $competitor[$i . "-leg-time"] ) ) {
+                $competitor[$i . "-leg-pos"] = ++$j;
+            } else {
+                break;
+            }
+        }
     }
 
     /* Sort the competitors array */
@@ -149,7 +181,7 @@ function organizeCompetitors($competitors, $punches, $controls) {
 
 function writeSplitsHeader($control_list) {
     $num_controls = count($control_list);
-    
+
     for ($i = 0; $i < $num_controls; $i++)
         echo "<th colspan='2'>" . $control_list[$i] . "</th>";
     echo "<th colspan='2'>Finish</th>";
@@ -175,11 +207,20 @@ function writeSplits($competitors, $num_controls) {
         /* Splits for each control */
         for( $i = 0; $i < $num_controls; $i++ ) {
             if( isset( $row[$i] ) ) {
-                echo '<td class="times" data-time="' . $row[$i] . '">' . formatTime( $row[$i] ) . '<br />+' . formatTime( $row[$i . "-behind"] ) . '</td>';
-                if( $row['status'] <= 1 )
-                    echo '<td class="rank">(' . $row[$i . "-pos"] . ')</td>';
+                if( isset( $row[$i . "-leg-time"] ) ) {
+                    echo '<td class="times" data-time="' . $row[$i] . '">' . formatTime($row[$i . "-leg-time"]) . '<br />' . formatTime( $row[$i] ) . '</td>';
+                } else {
+                    echo '<td class="times" data-time="' . $row[$i] . '">&nbsp;<br />' . formatTime( $row[$i] ) . '</td>';
+                }
+                if( isset( $row[$i . "-leg-pos"] ) )
+                    echo '<td class="rank">(' . $row[$i . "-leg-pos"] . ')<br />';
                 else
-                    echo '<td class="rank">(-)</td>';
+                    echo '<td class="rank">&nbsp<br />';
+
+                if( $row['status'] <= 1 )
+                    echo '(' . $row[$i . "-pos"] . ')</td>';
+                else
+                    echo '(-)</td>';
             } else {
                 echo '<td class="times"></td><td class="rank"></td>';
             }
