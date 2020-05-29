@@ -116,3 +116,7 @@ vertical-align: middle;
 }
 
 #results-section { clear: both; }
+
+/* Make first two places show up differently */
+.rank-1 { color: red; }
+.rank-2 { color: blue; }

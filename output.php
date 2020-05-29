@@ -206,21 +206,56 @@ function writeSplits($competitors, $num_controls) {
 
         /* Splits for each control */
         for( $i = 0; $i < $num_controls; $i++ ) {
+            $overall_class = "";
+            $leg_class = "";
+            if( isset( $row[$i . "-pos"] ) ) {
+                $overall_class .= "rank-" . $row[$i . "-pos"];
+            }
+            if( isset( $row[$i . "-leg-pos"] ) ) {
+                $leg_class .= "rank-" . $row[$i . "-leg-pos"];
+            }
+
             if( isset( $row[$i] ) ) {
                 if( isset( $row[$i . "-leg-time"] ) ) {
-                    echo '<td class="times" data-time="' . $row[$i] . '">' . formatTime($row[$i . "-leg-time"]) . '<br />' . formatTime( $row[$i] ) . '</td>';
+                    echo '<td class="times" data-time="'
+                        . $row[$i]
+                        . '"><span class="'
+                        . $leg_class
+                        . '">'
+                        . formatTime($row[$i . "-leg-time"])
+                        . '</span><br /><span class="'
+                        . $overall_class
+                        . '">'
+                        . formatTime( $row[$i] )
+                        . '</span></td>';
                 } else {
-                    echo '<td class="times" data-time="' . $row[$i] . '">&nbsp;<br />' . formatTime( $row[$i] ) . '</td>';
+                    echo '<td class="times" data-time="'
+                        . $row[$i]
+                        . '">&nbsp;<br /><span class="'
+                        . overall_class
+                        . '">'
+                        . formatTime( $row[$i] )
+                        . '</span></td>';
                 }
+
                 if( isset( $row[$i . "-leg-pos"] ) )
-                    echo '<td class="rank">(' . $row[$i . "-leg-pos"] . ')<br />';
+                    echo '<td class="rank"><span class="'
+                        . $leg_class
+                        . '">('
+                        . $row[$i . "-leg-pos"]
+                        . ')</span><br />';
                 else
                     echo '<td class="rank">&nbsp<br />';
 
-                if( $row['status'] <= 1 )
-                    echo '(' . $row[$i . "-pos"] . ')</td>';
-                else
+                if( $row['status'] <= 1 ) {
+                    echo '<span class="'
+                        . $overall_class
+                        . '">('
+                        . $row[$i . "-pos"]
+                        . ')</span></td>';
+                } else {
                     echo '(-)</td>';
+                }
             } else {
                 echo '<td class="times"></td><td class="rank"></td>';
             }
@@ -228,9 +263,21 @@ function writeSplits($competitors, $num_controls) {
 
         /* And the finish! */
         if( $row['time'] ) {
-            echo '<td class="times" data-time="' . $row['time'] . '">' . formatTime( $row['time'] ) . '<br />+' . formatTime( $row["time-behind"] ) . '</td>';
+            echo '<td class="times" data-time="'
+                . $row['time']
+                . '"><span class="rank-'
+                . $place
+                . '">'
+                . formatTime( $row['time'] )
+                . '<br />+'
+                . formatTime( $row["time-behind"] )
+                . '</span></td>';
             if( $row['status'] <= 1 )
-                echo '<td class="rank">(' . $place  . ')</td>';
+                echo '<td class="rank"><span class="rank-'
+                    . $place
+                    . '">('
+                    . $place
+                    . ')</span></td>';
             else
                 echo '<td class="rank"></td>';
         } else {
