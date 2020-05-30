@@ -232,7 +232,7 @@ function writeSplits($competitors, $num_controls) {
                     echo '<td class="times" data-time="'
                         . $row[$i]
                         . '">&nbsp;<br /><span class="'
-                        . overall_class
+                        . $overall_class
                         . '">'
                         . formatTime( $row[$i] )
                         . '</span></td>';
