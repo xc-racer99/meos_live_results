@@ -84,6 +84,7 @@ if (!isset($cid) || isset($_GET['select'])) {
         printf("Error: %s\n", $mysqli->error);
     }
 ?>
+    <a href="/xml-export.php?cmp=<?php echo $cid; ?>"><button>Download IOF XML (v3)</button></a>
 
     <h3>Select Class</h3>
 <?php
