@@ -44,9 +44,8 @@ function getStatusString($status) {
  * return -1 if $a faster 1 if $b is faster
  */
 function competitorComparison($a, $b) {
-    /* If one has bad status, don't sort */
-    if( $a['status'] > 1 || $b['status'] > 1 ) {
-        return 0;
+    if( $a['status'] != $b['status'] ) {
+        return $a['status'] < $b['status'] ? -1 : 1;
     }
 
     /* Compare finish times if present */

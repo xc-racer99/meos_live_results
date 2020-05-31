@@ -151,18 +151,15 @@ if (!isset($cid) || isset($_GET['select'])) {
 			}
 
 			/* Get the OK or on course competitors */
+			$competitors = array();
+			$competitor_ids = "(";
 			$query = "SELECT cmp.id AS id, cmp.name AS name, org.name AS team, cmp.rt AS time, cmp.st AS start, cmp.stat AS status FROM mopCompetitor cmp LEFT JOIN mopOrganization AS org ON cmp.org = org.id AND cmp.cid = org.cid WHERE cmp.cls = $cls AND cmp.cid = $cid AND cmp.stat <= 1 ORDER BY cmp.stat, cmp.rt ASC, cmp.st ASC, cmp.id";
 			if ($result = $mysqli->query($query)) {
 				/* Store the competitiors info in an array, add their ID's to an SQL query */
-				$competitors = array();
-				$competitor_ids = "(";
 				while ($row = $result->fetch_assoc()) {
 					$competitors[] = $row;
 					$competitor_ids .= $row['id'] . ",";
 				}
-				/* Remove the tailing comma and add the closing brace */
-				$competitor_ids = substr($competitor_ids, 0, -1) . ")";
-
 				$result->free();
 			} else {
 				printf("Error: %s\n", $mysqli->error);
@@ -172,21 +169,18 @@ if (!isset($cid) || isset($_GET['select'])) {
 			/* Get the non-OK competitors */
 			$query = "SELECT cmp.id AS id, cmp.name AS name, org.name AS team, cmp.rt AS time, cmp.st AS start, cmp.stat AS status FROM mopCompetitor cmp LEFT JOIN mopOrganization AS org ON cmp.org = org.id AND cmp.cid = org.cid WHERE cmp.cls = $cls AND cmp.cid = $cid AND cmp.stat > 1 ORDER BY cmp.stat, cmp.rt ASC, cmp.st ASC, cmp.id";
 			if ($result = $mysqli->query($query)) {
-				/* Store the competitors and IDs in different data structures */
-				$competitors2 = array();
-				$competitor_ids2 = "(";
 				while ($row = $result->fetch_assoc()) {
-					$competitors2[] = $row;
-					$competitor_ids2 .= $row['id'] . ",";
+					$competitors[] = $row;
+					$competitor_ids .= $row['id'] . ",";
 				}
-				/* Remove the tailing comma and add the closing brace */
-				$competitor_ids2 = substr($competitor_ids2, 0, -1) . ")";
-
 				$result->free();
 			} else {
 				printf("Error: %s\n", $mysqli->error);
 				exit();
 			}
+
+			/* Remove the tailing comma and add the closing brace */
+			$competitor_ids = substr($competitor_ids, 0, -1) . ")";
 
 			/* Find all the controls that OK people punched */
 			$punches = array();
@@ -200,17 +194,6 @@ if (!isset($cid) || isset($_GET['select'])) {
 			/* Sort competitors and add split times to them */
 			$competitors = organizeCompetitors( $competitors, $punches, $controls );
 
-			/* Find all the controls that other people punched and add them to punches
-			 * Done afterwards so we don't pollute the current standings of OK people
-			 */
-			$query = "SELECT rt, ctrl, id FROM mopRadio WHERE cid=$cid AND ctrl IN " . $control_list . " AND id IN " . $competitor_ids2 . " ORDER BY rt";
-			if ($result = $mysqli->query($query)) {
-				while ($entry = $result->fetch_assoc())
-					$punches[] = $entry;
-				$result->free();
-			}
-			$competitors2 = organizeCompetitors( $competitors2, $punches, $controls );
-
 			/* setup our table */
 			$now = ( time() - strtotime("today") ) * 10;
 			echo "<div id='table-container' data-current-time='" . $now . "'>";
@@ -221,7 +204,6 @@ if (!isset($cid) || isset($_GET['select'])) {
 			echo "</tr>";
 
 			writeSplits( $competitors, count( $controls ) );
-			writeSplits( $competitors2, count( $controls ) );
 
 			echo "</table>";
 			echo "</div>";
