@@ -84,8 +84,6 @@ if (!isset($cid) || isset($_GET['select'])) {
         printf("Error: %s\n", $mysqli->error);
     }
 ?>
-    <a href="/xml-export.php?cmp=<?php echo $cid; ?>"><button>Download IOF XML (v3)</button></a>
-
     <h3>Select Class</h3>
 <?php
     $query = "SELECT id, name FROM mopClass WHERE cid=$cid ORDER BY ord";
@@ -245,6 +243,10 @@ if (!isset($cid) || isset($_GET['select'])) {
 
 /* Close SQL connection */
 $mysqli->close();
-?>
+if (isset($cid) && $cid > 0)  { ?>
+<section>
+	<a href="/xml-export.php?cmp=<?php echo $cid; ?>">Download IOF XML (v3)</a>
+</section>
+<?php } ?>
 </body>
 </html>
