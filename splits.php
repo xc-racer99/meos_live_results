@@ -217,7 +217,7 @@ if (!isset($cid) || isset($_GET['select'])) {
 /* Close SQL connection */
 $mysqli->close();
 if (isset($cid) && $cid > 0) { ?>
-<section>
+<section id="iof-xml-download">
 	<a href="/xml-export.php?cmp=<?php echo $cid; ?>">Download IOF XML (v3)</a>
 </section>
 <?php } ?>

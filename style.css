@@ -120,3 +120,6 @@ vertical-align: middle;
 /* Make first two places show up differently */
 .rank-1 { color: red; }
 .rank-2 { color: blue; }
+
+/* IOF XML download on own line */
+#iof-xml-download { clear: left; }
