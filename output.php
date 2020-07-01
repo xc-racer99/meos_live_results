@@ -182,7 +182,7 @@ function writeSplitsHeader($control_list) {
     $num_controls = count($control_list);
 
     for ($i = 0; $i < $num_controls; $i++)
-        echo "<th colspan='2'>" . $control_list[$i] . "</th>";
+        echo "<th colspan='2'>" . ($i + 1) . " (" . $control_list[$i] . ")</th>";
     echo "<th colspan='2'>Finish</th>";
 }
 
