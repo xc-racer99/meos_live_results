@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-  MeOS Online Protocol 1.0
+  MeOS Online Protocol 2.0
 
 -->
 
@@ -20,6 +20,8 @@
 
       Date:
       November 2013
+      Updated:
+      February 2020
     </xsd:documentation>
   </xsd:annotation>
   <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
@@ -150,7 +152,15 @@
             </xsd:documentation>
           </xsd:annotation>
         </xsd:attribute>
-        
+
+        <xsd:attribute name="crs" type="xsd:string" use="optional">
+          <xsd:annotation>
+            <xsd:documentation>
+              List of courses used by the class separated by comma (,).
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+
         <xsd:attribute name="ord" type="xsd:integer" use="optional">
           <xsd:annotation>
             <xsd:documentation>
@@ -179,6 +189,23 @@
             </xsd:documentation>
           </xsd:annotation>
         </xsd:attribute>
+        
+        <xsd:attribute name="nat" type="xsd:string" use="optional">
+          <xsd:annotation>
+            <xsd:documentation>
+              Three letter nationality.
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+        
+        <xsd:attribute name="delete" type="xsd:boolean" use="optional">
+          <xsd:annotation>
+            <xsd:documentation>
+              If set to true, the organization or club is removed.
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+
       </xsd:extension>
     </xsd:simpleContent>
   </xsd:complexType>
@@ -232,6 +259,30 @@
           </xsd:annotation>
         </xsd:attribute>
         
+        <xsd:attribute name="bib" type="xsd:string" use="optional">
+          <xsd:annotation>
+            <xsd:documentation>
+              Bib text, if defined
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+      
+        <xsd:attribute name="crs" type="xsd:string" use="optional">
+          <xsd:annotation>
+            <xsd:documentation>
+              Course id.
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+
+       <xsd:attribute name="nat" type="xsd:string" use="optional">
+          <xsd:annotation>
+            <xsd:documentation>
+              Three letter nationality
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+ 
       </xsd:extension>
     </xsd:simpleContent>
   </xsd:complexType>
@@ -270,13 +321,40 @@
         <xsd:element name="base" type="BaseCompetitor"/>
         <xsd:element name="radio" type="xsd:string" minOccurs="0" maxOccurs="1"/>
         <xsd:element name="input" type="Input" minOccurs="0" maxOccurs="1"/>
-      </xsd:sequence>
+    </xsd:sequence>
+    
     <xsd:attribute name="id" type="xsd:integer" use="required">
       <xsd:annotation>
         <xsd:documentation>
           Unique identifier of the competitor.
         </xsd:documentation>
         </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="card" type="xsd:integer" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          Card number. Absence of attribute indicate that card number has 
+          not been changed (if an update). The value 0 indicates no card.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="competing" type="xsd:boolean" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          If true, the competitor is considered currently competing. 
+          Absence of attribute indicates that the status is not known. 
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    
+    <xsd:attribute name="delete" type="xsd:boolean" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          If set to true, the competitor is removed.
+        </xsd:documentation>
+      </xsd:annotation>
     </xsd:attribute>
   </xsd:complexType>
 
@@ -305,6 +383,13 @@
       <xsd:annotation>
         <xsd:documentation>
           Unique identifier of the team.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="delete" type="xsd:boolean" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>
+          If set to true, the team is removed.
         </xsd:documentation>
       </xsd:annotation>
     </xsd:attribute>

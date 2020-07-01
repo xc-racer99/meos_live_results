@@ -1,6 +1,6 @@
 <?php
   /*
-  Copyright 2014-2018 Melin Software HB
+  Copyright 2014-2019 Melin Software HB
   
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -290,11 +290,7 @@ function updateLinkTable($link, $table, $cid, $id, $fieldName, $encoded) {
     if (strlen($leg) > 0) {
       $runners = explode(",", $leg);
       foreach($runners as $key => $runner) {
-        //$sql = "INSERT INTO $table SET cid='$cid', id='$id', leg=$legNumber, ord=$key, $fieldName=$runner"; 
-        //print "$sql \n";
-        //mysql_query($sql);
-        $stmt->execute();
-  
+        $stmt->execute();  
       }
     }
     $legNumber++;
@@ -348,6 +344,13 @@ function processClass($link, $cid, $cls) {
 /** Update organization table */
 function processOrganization($link, $cid, $org) {
   $id = $link->real_escape_string($org['id']);
+  
+  if ($org['delete'] == 'true') { // MOP2.0 support
+    $sql = "DELETE FROM mopOrganization WHERE cid='$cid' AND id='$id'";  
+    $link->query($sql);
+    return;
+  }
+  
   $name = $link->real_escape_string($org);
   $sqlupdate = "name='$name'";
   updateTable($link, "mopOrganization", $cid, $id, $sqlupdate);
@@ -357,6 +360,12 @@ function processOrganization($link, $cid, $org) {
 function processCompetitor($link, $cid, $cmp) {
   $base = $cmp->base;
   $id = $link->real_escape_string($cmp['id']);
+  
+  if ($cmp['delete'] == 'true') { // MOP2.0 support
+    $sql = "DELETE FROM mopCompetitor WHERE cid='$cid' AND id='$id'";  
+    $link->query($sql);
+    return;
+  }
   
   $name = $link->real_escape_string($base);
   $org = (int)$base['org'];
@@ -389,9 +398,6 @@ function processCompetitor($link, $cid, $cmp) {
       $radioId = (int)$tmp[0];
       $radioTime = (int)$tmp[1];
       $stmt->execute();
-   
-      //$sql = "REPLACE INTO mopRadio SET cid='$cid', id='$id', ctrl='$radioId', rt='$radioTime'";
-      //mysql_query($sql);
     }
   }  
 }
@@ -399,7 +405,14 @@ function processCompetitor($link, $cid, $cmp) {
 /** Update team table */
 function processTeam($link, $cid, $team) {
   $base = $team->base;
-  $id = $link->real_escape_string($team['id']); 
+  $id = $link->real_escape_string($team['id']);
+  
+  if ($team['delete'] == 'true') { // MOP2.0 support
+    $sql = "DELETE FROM mopTeam WHERE cid='$cid' AND id='$id'";  
+    $link->query($sql);
+    return;
+  }
+  
   $name = $link->real_escape_string($base);
   
   $org = (int)$base['org'];
