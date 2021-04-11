@@ -10,7 +10,7 @@ section, aside {
 
 /* Borders, don't wrap text */
 section table, section th, section td {
-    border: 1px solid black;
+    border: 1px solid #bfbfbf;
     border-collapse: collapse;
     padding: 3px;
     white-space: nowrap;
@@ -121,5 +121,6 @@ vertical-align: middle;
 .rank-1 { color: red; }
 .rank-2 { color: blue; }
 
-/* IOF XML download on own line */
+/* IOF XML download on own line & Smaller Font*/
 #iof-xml-download { clear: left; }
+#iof-xml-download a {font-size:small}

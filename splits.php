@@ -150,6 +150,33 @@ if (!isset($cid) || isset($_GET['select'])) {
 				printf("Error: %s\n", $mysqli->error);
 			}
 
+			/* Get the control display names */
+			$control_names = array();
+			$control_names_tmp = array();
+			$query = "SELECT name,id FROM mopControl WHERE cid=$cid AND id IN " . $control_list;
+			if ($result = $mysqli->query($query)) {
+				/* fetch object array */
+				while ($row = $result->fetch_row()) {
+					$control_names_tmp[] = $row;
+				}
+
+				/* Remove the tailing comma and add the closing brace */
+				$control_list = substr($control_list, 0, -1) . ")";
+
+				$result->close();
+			} else {
+				printf("Error: %s\n", $mysqli->error);
+			}
+			/* Need to order them properly now, might be able to do this with an advanced SQL query */
+			foreach ($controls as $control) {
+				foreach($control_names_tmp as $name) {
+					if ($name[1] == $control) {
+						$control_names[] = $name[0];
+						break;
+					}
+				}
+			}
+
 			/* Get the OK or on course competitors */
 			$competitors = array();
 			$competitor_ids = "(";
@@ -200,7 +227,7 @@ if (!isset($cid) || isset($_GET['select'])) {
 			echo '<table>';
 			echo "<tr>";
 			echo "<th>Place</th><th class='left-aligned'>Name<br />Club</th><th>Start Time</th>";
-			writeSplitsHeader($controls);
+			writeSplitsHeader($control_names);
 			echo "</tr>";
 
 			writeSplits( $competitors, count( $controls ) );
