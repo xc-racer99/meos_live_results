@@ -1,11 +1,80 @@
-header img {
-    height: 100px;
-    float: left;
+/* Fonts */
+body {
+ font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+ font-size:15px;
+ line-height:1.428571429;
+ color:black;
 }
 
+/* Links */
+a {
+ color:#428bca;
+ text-decoration:none
+}
+a:active,
+a:hover {
+ color:#2a6496;
+ text-decoration:underline
+}
+a:focus {
+ outline:thin dotted;
+ outline:5px auto -webkit-focus-ring-color;
+ outline-offset:-2px
+}
+
+/* Fix Header Elements Here*/
+
+header img {
+    max-height: 100px;
+    max-width:100%;
+    width:auto;
+}
+
+/* Top Navigation Menu Bar */
+
+.topnav {
+    background-color: #bf0000;
+}
+
+.topnav ul {
+    list-style-type:none;
+    padding:10px;
+}
+
+.topnav li {
+    display:inline;
+    padding-left:8px;
+    padding-right:8px;
+    padding-top: 20px;
+    padding-bottom:20px;
+    overflow:inline;
+    white-space: nowrap;
+}
+.topnav li>a {
+    font-weight: 700;
+    font-size:16px;
+    color:#fff;
+    text-decoration:none;
+    display:inline;
+}
+
+.topnav li>a:focus,
+.topnav li>a:hover{
+ color:black;
+}
+
+/* Competition List Formatting */
+.comp-list li{
+    list-style-type:none;
+    text-indent:-20px;
+    margin-left:10px;
+    padding-top:2px;
+    padding-bottom:2px;
+}
+
+/* Section Styling */
 section, aside {
     float: left;
-    padding: 10px;
 }
 
 /* Borders, don't wrap text */
@@ -77,12 +146,14 @@ border: 1px solid transparent;
 border-radius: 4px;
 user-select: none;
 color: #fff;
-background-color: #39b3d7;
-border-color: #269abc;
+background-color: #428bca;
+border-color: #357ebd;
 }
 
-/* Fonts */
-body {font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+button:hover{
+ color:#fff;
+ background-color:#3276b1;
+ border-color:#285e8e;
 }
 
 /*Upload Buttons & Fields Match WhyJustRun*/
@@ -99,6 +170,32 @@ border-radius: 4px;
 box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
 -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
 transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+
+/* Input Field "Button" */
+
+input[type=submit] {display: inline-block;
+padding: 6px 12px;
+margin-bottom: 0;
+font-size: 14px;
+font-weight: 400;
+line-height: 1.428571429;
+text-align: center;
+white-space: nowrap;
+vertical-align: middle;
+cursor: pointer;
+border: 1px solid transparent;
+border-radius: 4px;
+user-select: none;
+color: #fff;
+background-color: #5bc0de;
+border-color: #46b8da;
+}
+
+input[type=submit]:hover{
+ color:#fff;
+ background-color:#39b3d7;
+ border-color:#269abc;
 }
 
 select{padding: 6px 12px;
@@ -123,4 +220,9 @@ vertical-align: middle;
 
 /* IOF XML download on own line & Smaller Font*/
 #iof-xml-download { clear: left; }
-#iof-xml-download a {font-size:small}
+#iof-xml-download a {font-size:10px}
+
+
+
+
+

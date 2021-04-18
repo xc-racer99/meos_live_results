@@ -18,7 +18,7 @@ if (mysqli_connect_errno()) {
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 	<title>Live Results</title>
 	<link href="style.css" rel="stylesheet" type="text/css" />
 	<!-- favicon -->
@@ -30,8 +30,14 @@ if (mysqli_connect_errno()) {
 
 	<body>
 	<header>
-	<img src="images/SageLogo.png" />
-	<h1>Sage Orienteering Results</h1>
+	<img src="images/SageLogo.png" alt="Sage Orienteering Club Live Results"/>
+<div class="topnav">
+<ul>
+  <li><a href="https://results.sageorienteering.ca/">All Results</a></li>
+  <li><a href="https://sage.whyjustrun.ca/">Sage Home</a></li>
+  <li><a href="https://sage.whyjustrun.ca/pages/211">Help</a></li>
+</ul>
+</div>
 <?php
 	if (isset($_GET['cmp']) && is_numeric($_GET['cmp'])) {
 		$cid = $_GET['cmp'];
@@ -54,7 +60,7 @@ if (!isset($cid) || isset($_GET['select'])) {
 	echo "<section>";
 	$query = "SELECT name, date, cid FROM mopCompetition ORDER BY date DESC";
 	if ($result = $mysqli->query($query)) {
-		echo '<ul>';
+		echo '<ul class="comp-list">';
 		while ($row = $result->fetch_assoc())
 			echo '<li><a href="?cmp=' . $row['cid'] . '">' . $row['date'] . " - " . $row['name'] . '</a></li>';
 		$result->close();
@@ -66,7 +72,6 @@ if (!isset($cid) || isset($_GET['select'])) {
 } else {
 ?>
 	<aside>
-	<a href="?select"><button>Select Competition</button></a>
 <?php
 	$query = "SELECT homepage FROM mopCompetition WHERE cid=" . $cid;
 	if ($result = $mysqli->query($query)) {
@@ -95,7 +100,6 @@ if (!isset($cid) || isset($_GET['select'])) {
 	</aside>
 <?php
 	if (!isset($_GET['cls'])) {
-		echo "<section><h3>Please select a class</h3></section>";
 	} else if (!is_numeric($_GET['cls'])) {
 		/* How did we get here? Someone putting in random get parameters? */
 		echo "<p>Invalid Class</p>";
